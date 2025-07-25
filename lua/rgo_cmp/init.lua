@@ -6,20 +6,25 @@ local function detect_root()
   return root_files[1] and vim.fs.dirname(root_files[1]) or nil
 end
 
-function M.setup(opts)
-  -- Ensure dependencies are loaded
-  local ok, lspconfig = pcall(require, 'lspconfig')
-  if not ok then
-    vim.notify('nvim-lspconfig not found', vim.log.levels.ERROR)
-    return
-  end
-
+local function register_source_if_needed()
   local ok, cmp = pcall(require, 'cmp')
   if not ok then
-    vim.notify('nvim-cmp not found', vim.log.levels.ERROR)
+    vim.notify('nvim-cmp not found', vim.log.levels.WARN)
     return
   end
 
+  cmp.register_source('rgo', {
+    complete = function(self, params, callback)
+      local client = vim.lsp.get_active_clients({ name = 'rgo' })[1]
+      if not client then
+        return callback({ isIncomplete = true })
+      end
+      client.request('textDocument/completion', params, callback, self.bufnr)
+    end
+  })
+end
+
+M.setup = function (opts)
   -- Register LSP server using new Neovim 0.10+ API
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   -- 只启用completion和notification能力
@@ -32,7 +37,7 @@ function M.setup(opts)
   capabilities.textDocument.formatting = false
   capabilities.textDocument.codeAction = false
 
-  vim.lsp.start({
+  vim.lsp.config("rgo", {
     name = 'rgo',
     cmd = { 'rgo', 'lsp' },
     filetypes = { 'go' },
@@ -44,18 +49,9 @@ function M.setup(opts)
       }
     }
   })
+  vim.lsp.enable("rgo")
 
-  -- Setup nvim-cmp source with new API
-  cmp.register_source('rgo', {
-    complete = function(self, params, callback)
-      local client = vim.lsp.get_active_clients({ name = 'rgo' })[1]
-      if not client then
-        return callback({ isIncomplete = true })
-      end
-
-      client.request('textDocument/completion', params, callback, self.bufnr)
-    end
-  })
+  register_source_if_needed()
 end
 
 return M
