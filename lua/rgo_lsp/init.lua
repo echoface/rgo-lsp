@@ -2,7 +2,7 @@ local M = {}
 
 local function detect_root()
   local opts = { upward = true }
-  local root_files = vim.fs.find({ 'go.mod', 'rgo_config.yaml' }, opts)
+  local root_files = vim.fs.find({ 'rgo_config.yaml' }, opts)
   return root_files[1] and vim.fs.dirname(root_files[1]) or nil
 end
 
@@ -49,6 +49,7 @@ M.setup = function (opts)
       }
     }
   })
+  vim.notify('nvim-rgo config and enable rgo', vim.log.levels.Info)
   vim.lsp.enable("rgo")
 
   register_source_if_needed()
