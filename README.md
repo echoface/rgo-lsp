@@ -7,7 +7,7 @@ RGO CMP is a Neovim plugin that provides LSP server configuration and completion
 Using packer.nvim:
 ```lua
 use {
-  'echoface/rgo_cmp',
+  'echoface/rgo_lsp',
   requires = {
     'hrsh7th/nvim-cmp'
   }
@@ -17,12 +17,12 @@ use {
 Using lazy.nvim:
 ```lua
 {
-  'echoface/rgo_cmp',
+  'echoface/rgo_lsp',
   dependencies = {
     'hrsh7th/nvim-cmp'
   },
   config = function()
-    require('rgo_cmp').setup({})
+    require('rgo_lsp').setup({})
   end
 }
 ```
